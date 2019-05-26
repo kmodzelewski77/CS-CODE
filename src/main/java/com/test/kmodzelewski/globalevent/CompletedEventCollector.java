@@ -32,6 +32,7 @@ public class CompletedEventCollector implements EventCollector {
     }
 
     @Async("collectTaskExecutor")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void collectEventData(JsonEventEntry eventDataEntry)
     {
         eventCollectorLogger.debug("Add new event data entry with id: {}", eventDataEntry.getEventIdentifier() );

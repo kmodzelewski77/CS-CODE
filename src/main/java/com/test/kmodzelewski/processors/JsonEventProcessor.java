@@ -8,9 +8,10 @@ import com.test.kmodzelewski.service.EventCollector;
 import com.test.kmodzelewski.service.EventProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -26,10 +27,12 @@ public class JsonEventProcessor implements EventProcessor {
     private final EventCollector eventCollector;
 
     private final ApplicationContext context;
+    private final ThreadPoolTaskExecutor collectTaskExecutor;
 
-    public JsonEventProcessor(EventCollector eventCollector, ApplicationContext context) {
+    public JsonEventProcessor(EventCollector eventCollector, ApplicationContext context, ThreadPoolTaskExecutor collectTaskExecutor) {
         this.eventCollector = eventCollector;
         this.context = context;
+        this.collectTaskExecutor = collectTaskExecutor;
     }
 
     public void processFile(String filePath )
@@ -65,6 +68,5 @@ public class JsonEventProcessor implements EventProcessor {
         }
 
         fileProcessorLogger.info("End processing file: {}",filePath );
-        ((ConfigurableApplicationContext) context).close();
     }
 }

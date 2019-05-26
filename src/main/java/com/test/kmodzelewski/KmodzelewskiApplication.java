@@ -12,7 +12,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.util.concurrent.Executor;
 
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "com.test.kmodzelewski.data")
@@ -30,13 +29,20 @@ public class KmodzelewskiApplication  {
 		}
 		ConfigurableApplicationContext context = SpringApplication.run(KmodzelewskiApplication.class, args);
 		EventProcessor eventProcessor = context.getBean(EventProcessor.class);
+		ThreadPoolTaskExecutor collectTaskExecutor = context.getBean("collectTaskExecutor",ThreadPoolTaskExecutor.class);
 		eventProcessor.processFile( args[0]);
-		/*int exit = SpringApplication.exit(context);
-		System.exit(exit);*/
+		try {
+			while (collectTaskExecutor.getActiveCount() > 0)
+				Thread.sleep(5000);
+		} catch ( InterruptedException ie )
+		{
+
+		}
+		context.close();
 	}
 
 	@Bean(name="collectTaskExecutor")
-	public Executor getCollectTaskExecutor() {
+	public ThreadPoolTaskExecutor getCollectTaskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(7);
 		executor.setMaxPoolSize(128);
