@@ -32,7 +32,6 @@ public class CompletedEventCollector implements EventCollector {
     }
 
     @Async("collectTaskExecutor")
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void collectEventData(JsonEventEntry eventDataEntry)
     {
         eventCollectorLogger.debug("Add new event data entry with id: {}", eventDataEntry.getEventIdentifier() );
@@ -53,8 +52,7 @@ public class CompletedEventCollector implements EventCollector {
         eventCollectorLogger.trace("Prepare and save event: {}",idReferernece);
         if (collectedData.getMap().size() != 2 )
         {
-            throw new EventsProcessingException("There should be only two event items",
-                    collectedData.getMap().stream().map( EventData::getRawContent ).collect(Collectors.toList()));
+            throw new EventsProcessingException("There should be only two event items", null );
         }
         JsonEventEntry startEntry ;
         JsonEventEntry endEntry;

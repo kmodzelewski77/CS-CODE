@@ -31,17 +31,18 @@ public class KmodzelewskiApplication  {
 		ConfigurableApplicationContext context = SpringApplication.run(KmodzelewskiApplication.class, args);
 		EventProcessor eventProcessor = context.getBean(EventProcessor.class);
 		eventProcessor.processFile( args[0]);
-		int exit = SpringApplication.exit(context);
-		System.exit(exit);
+		/*int exit = SpringApplication.exit(context);
+		System.exit(exit);*/
 	}
 
 	@Bean(name="collectTaskExecutor")
 	public Executor getCollectTaskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(7);
-		executor.setMaxPoolSize(42);
-		executor.setQueueCapacity(11);
+		executor.setMaxPoolSize(128);
 		executor.setThreadNamePrefix("CollectTask-");
+		executor.setWaitForTasksToCompleteOnShutdown(true);
+		executor.setAwaitTerminationSeconds(10);
 		executor.setKeepAliveSeconds(10);
 		executor.initialize();
 		return executor;

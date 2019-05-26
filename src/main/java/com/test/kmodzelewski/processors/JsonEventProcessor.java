@@ -9,6 +9,8 @@ import com.test.kmodzelewski.service.EventProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -23,9 +25,11 @@ public class JsonEventProcessor implements EventProcessor {
     private Gson gsonParesr = new Gson();
     private final EventCollector eventCollector;
 
-    @Autowired
-    public JsonEventProcessor(EventCollector eventCollector) {
+    private final ApplicationContext context;
+
+    public JsonEventProcessor(EventCollector eventCollector, ApplicationContext context) {
         this.eventCollector = eventCollector;
+        this.context = context;
     }
 
     public void processFile(String filePath )
@@ -42,6 +46,10 @@ public class JsonEventProcessor implements EventProcessor {
                 fileProcessorLogger.trace("Got another line: {}:  [{}]",  lineNo, line);
                 JsonMicroEvent jsonMicroEvent = gsonParesr.fromJson(line, JsonMicroEvent.class );
                 eventCollector.collectEventData( new JsonEventEntry( line,jsonMicroEvent ));
+                if ( lineNo % 10000 == 0 )
+                {
+                    fileProcessorLogger.info("Processed {} lines", lineNo);
+                }
                 } catch ( JsonSyntaxException jse )
                 {
                     fileProcessorLogger.warn("Could not parse entry at line: {}, {}", lineNo, jse.getMessage() );
@@ -57,5 +65,6 @@ public class JsonEventProcessor implements EventProcessor {
         }
 
         fileProcessorLogger.info("End processing file: {}",filePath );
+        ((ConfigurableApplicationContext) context).close();
     }
 }
